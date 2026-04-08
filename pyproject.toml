@@ -3,12 +3,19 @@ name = "workbenchrl"
 version = "0.1.0"
 description = "Multi-task RL environment for OpenEnv Hackathon"
 authors = [{name = "Arnab"}]
+
 dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic",
-    "openai"
+    "openai",
+    "openenv>=0.2.0"
 ]
 
+# ✅ REQUIRED ENTRY POINT
+[project.scripts]
+server = "inference:app"
+
+# ✅ REQUIRED FOR OPENENV
 [tool.openenv]
 entrypoint = "inference:app"
