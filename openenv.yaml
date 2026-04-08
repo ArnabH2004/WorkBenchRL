@@ -1,0 +1,22 @@
+name: workbenchrl
+description: Multi-task AI environment for real-world task simulation
+
+tasks:
+  - name: email
+    description: Classify emails into spam, important, or promo
+  - name: data
+    description: Clean structured tabular data
+  - name: code
+    description: Review and fix buggy code
+
+observation_space:
+  type: object
+  description: Task-specific input (text, dict, or code)
+
+action_space:
+  type: object
+  description: Task-specific action (label, dict, or code fix)
+
+reward:
+  type: float
+  description: Step-wise reward with final score between 0 and 1
