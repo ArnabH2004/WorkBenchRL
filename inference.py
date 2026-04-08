@@ -4,18 +4,21 @@ from pydantic import BaseModel
 from openai import OpenAI
 
 # ==============================
-# ENV VARIABLES (REQUIRED)
+# ENV VARIABLES (SAFE VERSION)
 # ==============================
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
+# ✅ FIX: Do NOT crash if missing
 if HF_TOKEN is None:
-    raise ValueError("HF_TOKEN environment variable is required")
+    print("⚠️ Warning: HF_TOKEN not set. Running in fallback mode.")
 
-# OpenAI client (REQUIRED by guidelines)
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+# OpenAI client (only if token exists)
+client = None
+if HF_TOKEN:
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 # ==============================
 # FASTAPI APP
@@ -24,20 +27,20 @@ client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 app = FastAPI()
 
 # ==============================
-# STATE (simple demo state)
+# STATE
 # ==============================
 
 current_step = 0
 
 # ==============================
-# REQUEST FORMAT
+# REQUEST MODEL
 # ==============================
 
 class StepRequest(BaseModel):
     action: str
 
 # ==============================
-# RESET ENDPOINT (MANDATORY)
+# RESET ENDPOINT (REQUIRED)
 # ==============================
 
 @app.post("/reset")
@@ -51,7 +54,7 @@ def reset():
     }
 
 # ==============================
-# STEP ENDPOINT (MANDATORY)
+# STEP ENDPOINT (REQUIRED)
 # ==============================
 
 @app.post("/step")
@@ -61,7 +64,7 @@ def step(request: StepRequest):
 
     action = request.action
 
-    # Simple deterministic logic (baseline agent)
+    # Deterministic logic (baseline)
     reward = 0.10
     done = False
 
@@ -76,7 +79,7 @@ def step(request: StepRequest):
     }
 
 # ==============================
-# ROOT ENDPOINT (OPTIONAL)
+# HEALTH CHECK
 # ==============================
 
 @app.get("/")
