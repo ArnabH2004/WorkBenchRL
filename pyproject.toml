@@ -1,8 +1,6 @@
 [project]
 name = "workbenchrl"
 version = "0.1.0"
-description = "Multi-task RL environment"
-authors = [{ name = "Arnab" }]
 requires-python = ">=3.10"
 
 dependencies = [
@@ -13,13 +11,9 @@ dependencies = [
     "openenv>=0.1.0"
 ]
 
-# ✅ THIS FIXES YOUR ERROR
 [project.scripts]
 server = "inference:main"
-
-# optional
 start = "inference:main"
 
-# ✅ DO NOT CHANGE
 [tool.openenv]
 entrypoint = "inference:app"
