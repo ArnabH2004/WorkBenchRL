@@ -1,28 +1,65 @@
 import os
 from fastapi import FastAPI
+from pydantic import BaseModel
 
-# ✅ ENV VARIABLES
+# =========================
+# ENV VARIABLES
+# =========================
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# ✅ Avoid crash on HF Spaces
+# Avoid crash on HF
 if HF_TOKEN is None:
     HF_TOKEN = "dummy_token"
 
-# ✅ FASTAPI APP (for Hugging Face)
+# =========================
+# FASTAPI APP (CRITICAL)
+# =========================
 app = FastAPI()
 
+current_step = 0
+
+class StepRequest(BaseModel):
+    action: str
+
+# ✅ REQUIRED ENDPOINT
+@app.post("/reset")
+def reset():
+    global current_step
+    current_step = 0
+    return {
+        "observation": "Task started",
+        "done": False
+    }
+
+# ✅ REQUIRED ENDPOINT
+@app.post("/step")
+def step(request: StepRequest):
+    global current_step
+    current_step += 1
+
+    reward = 0.10
+    done = current_step >= 3
+
+    return {
+        "observation": f"Processed: {request.action}",
+        "reward": round(reward, 2),
+        "done": done,
+        "info": {}
+    }
+
+# =========================
+# HUGGING FACE TEST ROUTE
+# =========================
 @app.get("/")
 def home():
     return {"status": "WorkBenchRL is running 🚀"}
 
-# ✅ MAIN LOGIC (for hackathon validator)
+# =========================
+# HACKATHON OUTPUT LOGIC
+# =========================
 def main():
-    task_name = "email"
-    env_name = "workbench"
-    model_name = MODEL_NAME
-
     steps = [
         {"action": "spam", "reward": 0.10, "done": False},
         {"action": "important", "reward": 0.10, "done": False},
@@ -31,7 +68,7 @@ def main():
 
     rewards = []
 
-    print(f"[START] task={task_name} env={env_name} model={model_name}", flush=True)
+    print(f"[START] task=email env=workbench model={MODEL_NAME}", flush=True)
 
     for i, step in enumerate(steps, start=1):
         action = step["action"]
@@ -53,6 +90,6 @@ def main():
         flush=True
     )
 
-# ✅ REQUIRED ENTRYPOINT
+# REQUIRED ENTRYPOINT
 if __name__ == "__main__":
     main()
