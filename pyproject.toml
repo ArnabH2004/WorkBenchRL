@@ -13,10 +13,13 @@ dependencies = [
     "openenv>=0.1.0"
 ]
 
-# Optional but good practice
+# ✅ REQUIRED FIX (THIS WAS MISSING)
 [project.scripts]
+server = "inference:app"
+
+# Optional (keep if you want)
 start = "inference:main"
 
-# ✅ CRITICAL (DO NOT CHANGE)
+# ✅ DO NOT CHANGE
 [tool.openenv]
 entrypoint = "inference:app"
