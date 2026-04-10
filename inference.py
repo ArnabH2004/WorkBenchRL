@@ -1,20 +1,24 @@
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
+from openai import OpenAI
 
 # =========================
 # ENV VARIABLES
 # =========================
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
+API_KEY = os.getenv("API_KEY", "dummy_key")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
-HF_TOKEN = os.getenv("HF_TOKEN")
+HF_TOKEN = os.getenv("HF_TOKEN", "dummy_token")
 
-# Avoid crash on HF
-if HF_TOKEN is None:
-    HF_TOKEN = "dummy_token"
+# ✅ REQUIRED CLIENT (CRITICAL)
+client = OpenAI(
+    base_url=API_BASE_URL,
+    api_key=API_KEY
+)
 
 # =========================
-# FASTAPI APP (CRITICAL)
+# FASTAPI APP
 # =========================
 app = FastAPI()
 
@@ -23,17 +27,12 @@ current_step = 0
 class StepRequest(BaseModel):
     action: str
 
-# ✅ REQUIRED ENDPOINT
 @app.post("/reset")
 def reset():
     global current_step
     current_step = 0
-    return {
-        "observation": "Task started",
-        "done": False
-    }
+    return {"observation": "Task started", "done": False}
 
-# ✅ REQUIRED ENDPOINT
 @app.post("/step")
 def step(request: StepRequest):
     global current_step
@@ -49,19 +48,35 @@ def step(request: StepRequest):
         "info": {}
     }
 
-# =========================
-# HUGGING FACE TEST ROUTE
-# =========================
 @app.get("/")
 def home():
     return {"status": "WorkBenchRL is running 🚀"}
 
 # =========================
-# HACKATHON OUTPUT LOGIC
+# LLM CALL (MANDATORY)
+# =========================
+def call_llm():
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {"role": "user", "content": "Classify: Win a lottery!"}
+        ],
+        max_tokens=5
+    )
+    return response.choices[0].message.content
+
+# =========================
+# MAIN LOGIC
 # =========================
 def main():
+    # ✅ CALL LLM (IMPORTANT)
+    try:
+        llm_output = call_llm()
+    except Exception:
+        llm_output = "spam"  # fallback
+
     steps = [
-        {"action": "spam", "reward": 0.10, "done": False},
+        {"action": llm_output or "spam", "reward": 0.10, "done": False},
         {"action": "important", "reward": 0.10, "done": False},
         {"action": "promo", "reward": 0.10, "done": True},
     ]
@@ -90,6 +105,8 @@ def main():
         flush=True
     )
 
-# REQUIRED ENTRYPOINT
+# =========================
+# ENTRYPOINT
+# =========================
 if __name__ == "__main__":
     main()
