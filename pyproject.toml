@@ -13,11 +13,11 @@ dependencies = [
     "openenv>=0.1.0"
 ]
 
-# ✅ REQUIRED FIX (THIS WAS MISSING)
+# ✅ THIS FIXES YOUR ERROR
 [project.scripts]
-server = "inference:app"
+server = "inference:main"
 
-# Optional (keep if you want)
+# optional
 start = "inference:main"
 
 # ✅ DO NOT CHANGE
