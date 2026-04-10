@@ -2,7 +2,8 @@
 name = "workbenchrl"
 version = "0.1.0"
 description = "Multi-task RL environment"
-authors = [{name = "Arnab"}]
+authors = [{ name = "Arnab" }]
+requires-python = ">=3.10"
 
 dependencies = [
     "fastapi",
@@ -12,9 +13,10 @@ dependencies = [
     "openenv>=0.1.0"
 ]
 
-# ✅ IMPORTANT CHANGE
+# Optional but good practice
 [project.scripts]
-server = "server.app:main"
+start = "inference:main"
 
+# ✅ CRITICAL (DO NOT CHANGE)
 [tool.openenv]
-entrypoint = "server.app:main"
+entrypoint = "inference:app"
